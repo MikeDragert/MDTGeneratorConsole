@@ -8,15 +8,15 @@ namespace MDTGenerators
 {
     public class GeneratorSum : Generator
     {
-        public GeneratorSum(string Name, int Interval, object[][] Data) : base(Name, Interval, Data) {
-            operation = GeneratorTypes.sum.ToString();
+        public GeneratorSum(string name, int interval, object[][] data) : base(name, interval, data) {
+            _Operation = GeneratorTypes.sum.ToString();
         }
 
         public override float CalculateResults() {
             //let's be safe and double check value index
-            if ((currentDataRowSet >= 0) && !(IsDone())) {
+            if ((_CurrentDataRowSet >= 0) && !(IsDone())) {
                 float sumOfValues = GetSumOfValues();
-                currentDataRowSet++;  //increment for next iteration
+                _CurrentDataRowSet++;  //increment for next iteration
                 return sumOfValues;
             }
             //if program had exception handling, could consider throwing exception instead
@@ -25,7 +25,7 @@ namespace MDTGenerators
 
         protected float GetSumOfValues() {
             float accumulator = 0;
-            object[] floatArray = data[currentDataRowSet].Where(i => i is float).ToArray();
+            object[] floatArray = _Data[_CurrentDataRowSet].Where(i => i is float).ToArray();
             foreach (float val in floatArray) {
                 accumulator += val;
             }

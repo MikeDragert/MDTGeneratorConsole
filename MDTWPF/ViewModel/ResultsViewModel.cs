@@ -10,14 +10,14 @@ namespace MDTWPF.ViewModel
     //  this is pretty simple, maybe didn't have to be it's own viewmodel
     public class ResultsViewModel : INotifyPropertyChanged
     {
-        private string results = "";
+        private string _results = "";
 
         public string Results {
             get {
-                return results;
+                return _results;
             }
             set {
-                results = value;
+                _results = value;
                 OnPropertyChanged("Results");
             }
         }

@@ -12,7 +12,7 @@ namespace MDTConsole
 {
     class Program
     {
-        private const string _JSONFileName = @"E:\Mike's Document's and Files\MDT\data.json";
+        private const string _JSONFileName = @"E:\Mike's Document's and Files\MDT\data.json"; //ideally this would come from a config file
 
         static void Main(string[] args) {
             string json = File.ReadAllText(_JSONFileName);

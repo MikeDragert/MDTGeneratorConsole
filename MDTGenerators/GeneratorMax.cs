@@ -8,14 +8,14 @@ namespace MDTGenerators
 {
     public class GeneratorMax : Generator
     {
-        public GeneratorMax(string Name, int Interval, object[][] Data) : base(Name, Interval, Data) {
-            operation = GeneratorTypes.max.ToString();
+        public GeneratorMax(string name, int interval, object[][] data) : base(name, interval, data) {
+            _Operation = GeneratorTypes.max.ToString();
         }
 
         public override float CalculateResults() {            
-            if ((currentDataRowSet >= 0) && !(IsDone())) { //let's be safe and double check value index
+            if ((_CurrentDataRowSet >= 0) && !(IsDone())) { //let's be safe and double check value index
                 float maxValue = GetMaxValue();
-                currentDataRowSet++;  //increment for next iteration
+                _CurrentDataRowSet++;  //increment for next iteration
                 return maxValue;
             }
             //if program had exception handling, could consider throwing exception instead
@@ -24,7 +24,7 @@ namespace MDTGenerators
 
         private float GetMaxValue() {
             float maxValue = 0;
-            object[] floatArray = data[currentDataRowSet].Where(i => i is float).ToArray();
+            object[] floatArray = _Data[_CurrentDataRowSet].Where(i => i is float).ToArray();
             if (floatArray.Length > 0) maxValue = (float)floatArray[0]; //this line is here in case there are negative numbers!!
             foreach (float val in floatArray) {
                 if (val > maxValue) maxValue = val;

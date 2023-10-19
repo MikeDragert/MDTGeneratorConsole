@@ -8,16 +8,16 @@ namespace MDTGenerators
 {
     public class GeneratorAverage : GeneratorSum
     {
-        public GeneratorAverage(string Name, int Interval, object[][] Data) : base(Name, Interval, Data) {
-            operation = GeneratorTypes.average.ToString();
+        public GeneratorAverage(string name, int interval, object[][] data) : base(name, interval, data) {
+            _Operation = GeneratorTypes.average.ToString();
         }
 
         public override float CalculateResults() {            
-            if ((currentDataRowSet >= 0) && !(IsDone())) { //let's be safe and double check value index
+            if ((_CurrentDataRowSet >= 0) && !(IsDone())) { //let's be safe and double check value index
                 float sumOfValues = GetSumOfValues();
-                int index = currentDataRowSet; //save this, cause we want to return the calculation with the not incremented value
-                currentDataRowSet++;  //increment for next iteration
-                return sumOfValues / data[index].Length;
+                int index = _CurrentDataRowSet; //save this, cause we want to return the calculation with the not incremented value
+                _CurrentDataRowSet++;  //increment for next iteration
+                return sumOfValues / _Data[index].Length;
             }
             //if program had exception handling, could consider throwing exception instead
             return 0;

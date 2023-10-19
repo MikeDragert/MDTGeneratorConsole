@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Text.Json.Serialization;
 
 namespace MDTGenerators
 {
@@ -11,14 +12,14 @@ namespace MDTGenerators
     // new generator types need to inherit from this, and supply the calc() function
     public abstract class Generator
     {
-        protected string name = "";
-        protected int interval = 0;
-        protected string operation = ""; //initially this was not supposed to be needed, we know the type based on the class
+        protected string _Name = "";
+        protected int _Interval = 0;
+        protected string _Operation = ""; //initially this was not supposed to be needed, we know the type based on the class
                                          //but step 2 dictates that we have this field.
                                          // it will be initialized to match the type of class loaded
                                          //  and if the viewmodel changes it, GeneratorMain needs to correct the generator type before executing!!!
-        protected object[][] data = { };
-        protected int currentDataRowSet = 0;  //this is the current data set row that this generator is working on as part of generation
+        protected object[][] _Data = { };
+        protected int _CurrentDataRowSet = 0;  //this is the current data set row that this generator is working on as part of generation
                                             // it should increment with each new line of data that the generator calculates
 
         public enum GeneratorTypes {
@@ -28,42 +29,43 @@ namespace MDTGenerators
             max
         }
 
+        
         public string Name {
             get {
-                return name;
+                return _Name;
             }
             set {
-                name = value;
+                _Name = value;
             }
         }
 
         public int Interval {
             get {
-                return interval;
+                return _Interval;
             }
             set {
-                interval = value;
+                _Interval = value;
             }
         }
 
         public string Operation {
             get {
-                return operation;
+                return _Operation;
             }
             set {                
-                if (operation != value) {  //we actually need to validate the operation before accepting it
+                if (_Operation != value) {  //we actually need to validate the operation before accepting it
                     if (ValidOperation(value)) {
-                        operation = value;
+                        _Operation = value;
                     }
                 }
             }
         }
 
-        public Generator(string Name, int Interval, object[][] Data) {
-            name = Name;           
-            interval = Interval > 0 ? Interval : 0; //seems like a negative interval would not make sense...
-            data = Data;
-            currentDataRowSet = 0;
+        public Generator(string name, int interval, object[][] data) {
+            _Name = name;           
+            _Interval = interval > 0 ? interval : 0; //seems like a negative interval would not make sense...
+            _Data = data;
+            _CurrentDataRowSet = 0;
         }
 
         public abstract float CalculateResults();
@@ -77,24 +79,24 @@ namespace MDTGenerators
         }
 
         public string getCalcString() {
-            return DateTime.Now.ToString("hh:mm:ss") +" " + this.name + " " + this.CalculateResults().ToString();
+            return DateTime.Now.ToString("hh:mm:ss") +" " + _Name + " " + this.CalculateResults().ToString();
         }
         
         public void Wait() {
-            Thread.Sleep(interval * 1000);
+            Thread.Sleep(_Interval * 1000);
         }
 
         public void Reset() {
-            currentDataRowSet = 0;  
+            _CurrentDataRowSet = 0;  
         }
 
         public bool IsDone() {
-            return currentDataRowSet >= data.Length;
+            return _CurrentDataRowSet >= _Data.Length;
         }
 
-        public void SetDataSets(object[][] DataSet) {
-            if (currentDataRowSet == 0) { //block this out if in middle of executing the generators, so nothing gets messed up
-                data = DataSet;
+        public void SetDataSets(object[][] dataSet) {
+            if (_CurrentDataRowSet == 0) { //block this out if in middle of executing the generators, so nothing gets messed up
+                _Data = dataSet;
             }
         }
     }

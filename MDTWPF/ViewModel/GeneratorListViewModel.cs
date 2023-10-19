@@ -19,26 +19,26 @@ namespace MDTWPF.ViewModel
     //this is the main view model for the generator data
     public class GeneratorListViewModel : INotifyPropertyChanged
     {
-        GeneratorMain generatorMain = new GeneratorMain();  //generator main has the business logic and generator data - this is the data model       
-        public ResultsViewModel resultsViewModel = new ResultsViewModel();
-        private DataTable dataSetTable;
-        private Thread generatorThread;
-        private string fileName = "";
-        private string prevFileName = "";
-        private DataTable prevDataSetTable;
+        private GeneratorMain _generatorMain = new GeneratorMain();  //generator main has the business logic and generator data - this is the data model       
+        public ResultsViewModel _ResultsViewModel = new ResultsViewModel();
+        private DataTable _dataSetTable;
+        private Thread _generatorThread;
+        private string _fileName = "";
+        private string _prevFileName = "";
+        private DataTable _prevDataSetTable;
 
         public ResultsViewModel Results {
             get {
-                return resultsViewModel;
+                return _ResultsViewModel;
             }
             set {
-                resultsViewModel = value;
+                _ResultsViewModel = value;
             }
         }
 
         public ObservableCollection<Generator> Generators {
             get {
-                return generatorMain.Generators;
+                return _generatorMain.Generators;
             }
             set {
                 //leave set blank, update through methods
@@ -47,27 +47,27 @@ namespace MDTWPF.ViewModel
 
         public string FileName {
             get {
-                return fileName;
+                return _fileName;
             }
             set {
-                fileName = value;
+                _fileName = value;
                 OnPropertyChanged("FileName");
             }
         }
 
         private void ExecutingAllGenerators() {
             ClearResults();
-            generatorMain.ExecuteGenerators();
+            _generatorMain.ExecuteGenerators();
             WhileNotDoneCheckForNewLinesAndAddToResults();            
         }
 
         private void ClearResults() {
-            resultsViewModel.Results = "";
+            _ResultsViewModel.Results = "";
             OnPropertyChanged("Results");
         }
 
         private void WhileNotDoneCheckForNewLinesAndAddToResults() {
-            while (!generatorMain.IsAllGeneratorsDone()) {
+            while (!_generatorMain.IsAllGeneratorsDone()) {
                 CheckForNewLinesAndAddToResults();
                 Thread.Sleep(50);
             }
@@ -75,11 +75,11 @@ namespace MDTWPF.ViewModel
         }
 
         private void CheckForNewLinesAndAddToResults() {
-            List<string> nextLines = generatorMain.GetNewLines();
+            List<string> nextLines = _generatorMain.GetNewLines();
             if (nextLines.Count > 0) {
                 for (int index = 0; index < nextLines.Count; index++) {
                     if (nextLines[index] is string) {
-                        resultsViewModel.Results += nextLines[index] + System.Environment.NewLine;
+                        _ResultsViewModel.Results += nextLines[index] + System.Environment.NewLine;
                     }
                 }
                 OnPropertyChanged("Results");
@@ -100,23 +100,23 @@ namespace MDTWPF.ViewModel
 
         private void ReadJSONFileAndLoadToGenerator(string fileName) {
             string json = File.ReadAllText(fileName);
-            generatorMain.LoadJSON(json);
+            _generatorMain.LoadJSON(json);
         }
 
         public GeneratorListViewModel() {
-            fileName = GetNoFileMessage();
+            _fileName = GetNoFileMessage();
         }
 
         private void RefreshDataSetTableFromGeneratorObjectArray() {
 
-            object[][] retrievedDataSets = generatorMain.GetDataSets();
+            object[][] retrievedDataSets = _generatorMain.GetDataSets();
             GetDataTableFromRetrievedDataSet(retrievedDataSets);
             OnPropertyChanged("DataSetTable");
         }
 
         private void GetDataTableFromRetrievedDataSet(object[][] retrievedDataSets) {
             int maxRowColumnCount = GetMaxRowColumnCount(retrievedDataSets);
-            dataSetTable = new DataTable();
+            _dataSetTable = new DataTable();
             EnsureDataSetTableHasMaxColumns(maxRowColumnCount);
             CreateAndAddDataRows(retrievedDataSets, maxRowColumnCount);
         }
@@ -132,10 +132,10 @@ namespace MDTWPF.ViewModel
         
         private void EnsureDataSetTableHasMaxColumns(int columnCount) {
             int columnIndex = 0;
-            while (dataSetTable.Columns.Count < columnCount) {
+            while (_dataSetTable.Columns.Count < columnCount) {
                 columnIndex++;
                 DataColumn newColumn = CreateNewColumn(columnIndex);
-                dataSetTable.Columns.Add(newColumn);
+                _dataSetTable.Columns.Add(newColumn);
             }
         }
 
@@ -148,8 +148,8 @@ namespace MDTWPF.ViewModel
 
         private void CreateAndAddDataRows(object[][] retrievedDataSets, int maxRowColumnCountRow) {
             foreach (object[] rowDataSet in retrievedDataSets) {
-                object[] newDataRowArrayArray = CreateAndCopyDataRow(rowDataSet, maxRowColumnCountRow);               
-                dataSetTable.Rows.Add(newDataRowArrayArray);
+                object[] newDataRowArrayArray = CreateAndCopyDataRow(rowDataSet, maxRowColumnCountRow);
+                _dataSetTable.Rows.Add(newDataRowArrayArray);
             }
         }
 
@@ -163,29 +163,29 @@ namespace MDTWPF.ViewModel
 
         public DataTable DataSetTable {
             get {
-                if (dataSetTable is null) RefreshDataSetTableFromGeneratorObjectArray();  //maked sure datatable is populated based on the actual data in our model!!
-                return dataSetTable;
+                if (_dataSetTable is null) RefreshDataSetTableFromGeneratorObjectArray();  //maked sure datatable is populated based on the actual data in our model!!
+                return _dataSetTable;
             }
             set {
-                dataSetTable = value;
+                _dataSetTable = value;
                 SendDataSetTableToGeneratorMain();
                 OnPropertyChanged("DataSetTable");
             }
         }
         
         private void SendDataSetTableToGeneratorMain() {
-            if (!(dataSetTable is null))
+            if (!(_dataSetTable is null))
             {
                 object[][] newDataSetObjectArray = CreateNewObjectArrayFromDataSetTable();
-                generatorMain.Reset();  //if we ran the generators, need to reset before changing data
-                generatorMain.UpdateDataSets(newDataSetObjectArray);
+                _generatorMain.Reset();  //if we ran the generators, need to reset before changing data
+                _generatorMain.UpdateDataSets(newDataSetObjectArray);
             }
         }
 
         private object[][] CreateNewObjectArrayFromDataSetTable() {
-            object[][] newDataSetObjectArray = new object[dataSetTable.Rows.Count][];
-            for (int rIndex = 0; rIndex < dataSetTable.Rows.Count; rIndex++) {
-                newDataSetObjectArray[rIndex] = dataSetTable.Rows[rIndex].ItemArray;
+            object[][] newDataSetObjectArray = new object[_dataSetTable.Rows.Count][];
+            for (int rIndex = 0; rIndex < _dataSetTable.Rows.Count; rIndex++) {
+                newDataSetObjectArray[rIndex] = _dataSetTable.Rows[rIndex].ItemArray;
             }
             return newDataSetObjectArray;
         }
@@ -219,31 +219,31 @@ namespace MDTWPF.ViewModel
         }
 
         public void ExecuteAllGenerators() {
-            generatorMain.Reset();
+            _generatorMain.Reset();
             //I had intended for the update to the table to get pushed to the generatorMain when the data is updated with "Set"
             //BUT that is not working, so do it here before we use the data
             SendDataSetTableToGeneratorMain();
-            generatorMain.CheckAndCorrectAllGeneratorsTypes();  //in case it was changed
+            _generatorMain.CheckAndCorrectAllGeneratorsTypes();  //in case it was changed
             StartNewGeneratorExecutionThread();
         }
 
-        public void StartNewGeneratorExecutionThread() { 
-            generatorThread = new Thread(ExecutingAllGenerators);
-            generatorThread.Start();
+        public void StartNewGeneratorExecutionThread() {
+            _generatorThread = new Thread(ExecutingAllGenerators);
+            _generatorThread.Start();
         }
 
         public void AddColumnToDataTable() {
-            DataColumn newColumn = CreateNewColumn(dataSetTable.Columns.Count + 1);
-            dataSetTable.Columns.Add(newColumn);
-            generatorMain.AddColumnToDataSet();
+            DataColumn newColumn = CreateNewColumn(_dataSetTable.Columns.Count + 1);
+            _dataSetTable.Columns.Add(newColumn);
+            _generatorMain.AddColumnToDataSet();
             OnPropertyChanged("DataSetTable");
         }
 
         public void RemoveColumnFromDataTable() {
-            if (dataSetTable.Columns.Count > 0) {
-                dataSetTable.Columns.RemoveAt(dataSetTable.Columns.Count - 1);
+            if (_dataSetTable.Columns.Count > 0) {
+                _dataSetTable.Columns.RemoveAt(_dataSetTable.Columns.Count - 1);
             }
-            generatorMain.RemoveColumnFromDataSet();
+            _generatorMain.RemoveColumnFromDataSet();
             OnPropertyChanged("DataSetTable");
         }
 
@@ -251,7 +251,7 @@ namespace MDTWPF.ViewModel
         public void SelectJSONFileForGenerators() {
             SaveCurrentValuesToPreviousForFileSelection();
 
-            fileName = GetNoFileMessage();
+            _fileName = GetNoFileMessage();
             Microsoft.Win32.OpenFileDialog dlg = CreateAndInitializeDialogBoxForFileSelection(); 
             Nullable<bool> dlgResult = dlg.ShowDialog();
 
@@ -267,13 +267,13 @@ namespace MDTWPF.ViewModel
         }
 
         private void SaveCurrentValuesToPreviousForFileSelection() {
-            prevFileName = fileName;
-            prevDataSetTable = dataSetTable; 
+            _prevFileName = _fileName;
+            _prevDataSetTable = _dataSetTable; 
         }
 
         private void ResetCurrentValuesFromPreviousForFileSelection() {
-            fileName = prevFileName;
-            DataSetTable = prevDataSetTable;
+            _fileName = _prevFileName;
+            _dataSetTable = _prevDataSetTable;
         }
 
         private bool IsFileOpenGoodStatus(Nullable<bool> dlgResult, string fileName) {
@@ -287,16 +287,16 @@ namespace MDTWPF.ViewModel
 
         private void AttemptLoadJSONFileToGenerators(string JSONFileName){
             InitializeForLoadJSONFileToGenerators(JSONFileName);
-            if (!LoadJSONToGenerators(fileName)) {
+            if (!LoadJSONToGenerators(_fileName)) {
                 ResetCurrentValuesFromPreviousForFileSelection();
             }
         }
 
         private void InitializeForLoadJSONFileToGenerators(string JSONFileName) {
-            fileName = JSONFileName;
-            generatorMain.Clear();
+            _fileName = JSONFileName;
+            _generatorMain.Clear();
             DataSetTable = null;
-            resultsViewModel.Results = "";
+            _ResultsViewModel.Results = "";
         }
 
         private Microsoft.Win32.OpenFileDialog CreateAndInitializeDialogBoxForFileSelection() {
